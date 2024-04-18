@@ -8,9 +8,9 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 3000;
 
-app.use('/api',userRoutes);
+app.use('/api/user',userRoutes);
 
 mongoose
   .connect(process.env.MONGO_URL)
@@ -21,6 +21,6 @@ mongoose
     console.log(err);
   });
 
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
