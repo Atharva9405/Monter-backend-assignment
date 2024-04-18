@@ -20,8 +20,28 @@ const registerUser = async (req, res) => {
       .status(201)
       .json({ message: "User registered. Please verify your account." });
   } catch (err) {
-    res.status(500).json({ error: err.message});
+    res.status(500).json({ error: err.message });
   }
 };
 
-module.exports = { registerUser };
+const verifyUser = async (req, res) => {
+  const { email, otp, location, age, work } = req.body;
+  try {
+    const user = await User.findOne({ email, otp });
+    if (!user) {
+      return res.status(400).json({ error: "Invalid OTP" });
+    }
+    user.isVerified = true;
+    user.location = location;
+    user.age = age;
+    user.work = work;
+    await user.save();
+    res.status(200).json({ message: "Account verified" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const loginUser = async (req, res) => {}
+
+module.exports = { registerUser, verifyUser, loginUser};
