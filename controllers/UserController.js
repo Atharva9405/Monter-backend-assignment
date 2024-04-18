@@ -67,4 +67,24 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, verifyUser, loginUser };
+const getUserDetails = async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json({
+      email: user.email,
+      isVerified: user.isVerified,
+      location: user.location,
+      age: user.age,
+      work: user.work,
+    });
+  } catch (err) {
+    res.status(401).json({ error: "Invalid token" });
+  }
+};
+
+module.exports = { registerUser, verifyUser, loginUser, getUserDetails };
