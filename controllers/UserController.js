@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const { sendOTPEmail, generateOTP } = require("../utils/sendOtpEmail");
 const User = require("../models/userModel");
+const jwt = require("jsonwebtoken");
 
 const registerUser = async (req, res) => {
   const { email, password } = req.body;
@@ -42,6 +43,28 @@ const verifyUser = async (req, res) => {
   }
 };
 
-const loginUser = async (req, res) => {}
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: "Invalid email or password" });
+    }
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return res.status(400).json({ error: "Invalid email or password" });
+    }
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
-module.exports = { registerUser, verifyUser, loginUser};
+    res.status(200).json({
+      message: "User Logged in successfully",
+      token: token,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = { registerUser, verifyUser, loginUser };
